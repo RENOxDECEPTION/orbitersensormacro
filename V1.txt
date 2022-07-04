@@ -1,4 +1,5 @@
 
+########################### WORK IN PROGRESS ##################################
 ############################################################### Filament Sensor
 [gcode_button filament_load]
 pin: ~PA1                     # FS - use the input pin you have connected the sensor to
