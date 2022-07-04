@@ -41,19 +41,14 @@ release_gcode:
       G92 E0                       # zero extruder position
       G4 P3000                     # wait for three seconds
       FORCE_MOVE STEPPER=extruder DISTANCE=20 VELOCITY=5 ACCEL=1000  # load filament inside the gears - force move needs to be enabled
-      
       {% if printer.extruder.temperature < temp_target|float*0.9 %}
             M109 S{temp_target|float*0.9} # wait till 0.9 of extruder temp is reached, then continue  
       {% endif %}
-      
       M104 S{temp_target}       #continue heating to preset no waiting
       FORCE_MOVE STEPPER=extruder DISTANCE=150 VELOCITY=5 ACCEL=1000
-      #G1 E150 F300                 # extrude 150mm
       M400                         # wait for current move to finish
       M104 S0                      # set hotend temperature to 0
-      #G92 E0                       # zero extruder position
       M118 Done Executing
-      
   {% endif %}
   
   
@@ -69,27 +64,16 @@ release_gcode:
   {% else %}
       M117 Filament unload
       UPDATE_DELAYED_GCODE ID=clear_display DURATION=10
-      M82                      # set extruder to absolute mode
-      
-      
-      #M104 S{temp_target}           # Set extruder temperature no waiting
-      
+      M82                      # set extruder to absolute mode      
       {% if printer.extruder.temperature < temp_target|float*0.9 %}
             M109 S{temp_target|float*0.9} # wait till 0.9 of extruder temp is reached, then continue  
       {% endif %}
-      
       M104 S{temp_target}       #continue heating to preset no waiting
       G4 P5000                     # wait for five seconds
-      #G92 E0                   # zero extruder position
       FORCE_MOVE STEPPER=extruder DISTANCE=10 VELOCITY=2 ACCEL=1000  # load filament inside the gears - force move needs to be enabled
-      #G0 E10 F300             # extrude filament to shape tip @300mm/min
-      #G92 E0
       FORCE_MOVE STEPPER=extruder DISTANCE=-5 VELOCITY=10 ACCEL=1000  # load filament inside the gears - force move needs to be enabled
-      #G0 E-5 F3600             # extract filament to cold end
       FORCE_MOVE STEPPER=extruder DISTANCE=-80 VELOCITY=5 ACCEL=1000  # load filament inside the gears - force move needs to be enabled
-      #G0 E-80 F300             # continue extraction slow allow filament to be cooled enough before reaches the gears
       FORCE_MOVE STEPPER=extruder DISTANCE=-50 VELOCITY=7.5 ACCEL=1000  # load filament inside the gears - force move needs to be enabled
-      #G1 E-50 F1500            # retract additional filament fast
       M104 S0                  # set hotend temperature to 0
       M300                     # play single beep - only works if you have the M300 macro in use
       
