@@ -1,7 +1,5 @@
-# This file includes a variable stored in a file in ~/filamentsensor.cfg
-# This is to make the macro to check condition that filament has runout or the unload button has been pushed before allowing a reload to execute.
-
-
+# This file includes a variable stored in a file in ~/filamentsensor.cfg, ensure file is created on running, and if any errors be sure to chmod it for read/write.
+# This is to make the macro to check condition that filament has runout before allowing a reload to execute hopefully ignoring multiple presses.
 
 [gcode_button filament_load]
 pin: PA1                     # FS - use the input pin you have connected the sensor to
