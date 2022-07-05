@@ -19,9 +19,7 @@ press_gcode:
     {% endif %}
 release_gcode:
   {% set temp_target = 235 %}
-  {% set paused = printer.pause_resume.is_paused == 'True' %}
-  #{% set run_once = printer["gcode_macro GLOBALS"].extrude|float %}
-  
+  {% set paused = printer.pause_resume.is_paused == 'True' %}  
   {% if printer.pause_resume.is_paused and printer.save_variables.variables.loadbutton %}
       SAVE_VARIABLE VARIABLE=loadbutton VALUE='False'
       SAVE_GCODE_STATE NAME=loading_filament
