@@ -24,8 +24,7 @@ press_gcode:
     
 ################################################################# RELEASE is essentially whent he sensor switches from No Filament -> Filament
 release_gcode:
-  {% set temp_target = 235 %}
-  {% set paused = printer.pause_resume.is_paused == 'True' %}  
+  {% set temp_target = 235 %} 
   {% if printer.pause_resume.is_paused and printer.save_variables.variables.loadbutton %}
   
       #First action is disable any further calls by setting bool false.
