@@ -3,58 +3,72 @@
 
 [gcode_button filament_load]
 pin: PA1                     # FS - use the input pin you have connected the sensor to
+
+################################################################# PRESS is essentially when the sensor switches from Filament -> No filament
 press_gcode:
     {% set printing = printer.state %}
     M118 {printing}
+    
     {% if printer.idle_timeout.state == "Printing" %}
         M118 "In PRESS PRINTING if statement"
+
+        #This boolean will enable the RELEASE button gcode
         SAVE_VARIABLE VARIABLE=loadbutton VALUE='True'
+
         PAUSE
+        
     {% else %}
         M118 "In PRESS else statement"
         M118 {printing}
     {% endif %}
+    
+################################################################# RELEASE is essentially whent he sensor switches from No Filament -> Filament
 release_gcode:
   {% set temp_target = 235 %}
   {% set paused = printer.pause_resume.is_paused == 'True' %}  
   {% if printer.pause_resume.is_paused and printer.save_variables.variables.loadbutton %}
+  
+      #First action is disable any further calls by setting bool false.
       SAVE_VARIABLE VARIABLE=loadbutton VALUE='False'
-      SAVE_GCODE_STATE NAME=loading_filament
+      
       M118 "In RELEASE PAUSED if STATEMENT"
       debugprint
       M118 {printer.state}
-      M82                          # set extruder to absolute mode
-      #G92 E0                       # zero extruder position
+      
       G4 P2000                     # wait for two seconds
       FORCE_MOVE STEPPER=extruder DISTANCE=20 VELOCITY=5 ACCEL=1000  # load filament inside the gears - force move needs to be enabled
-      FORCE_MOVE STEPPER=extruder DISTANCE=150 VELOCITY=5 ACCEL=1000
-      #G1 E150 F300                 # extrude 150mm
+      FORCE_MOVE STEPPER=extruder DISTANCE=120 VELOCITY=10 ACCEL=1000
       M400                         # wait for current move to finish
-      G92 E0
-      RESTORE_GCODE_STATE NAME=loading_filament
+      
       M118 Done Executing
+
   {% elif not printer.pause_resume.is_paused and printer.save_variables.variables.loadbutton %}
+      
+      #First action is disable any further calls by setting bool false.
       SAVE_VARIABLE VARIABLE=loadbutton VALUE='False'
+      
+      #Debug prints
       M118 "in RELEASE else STATEMENT"
       debugprint
       M118 {printer.state}
-      M82                          # set extruder to absolute mode
-      G92 E0                       # zero extruder position
+
       G4 P3000                     # wait for three seconds
-      FORCE_MOVE STEPPER=extruder DISTANCE=20 VELOCITY=5 ACCEL=1000  # load filament inside the gears - force move needs to be enabled
+      FORCE_MOVE STEPPER=extruder DISTANCE=20 VELOCITY=5 ACCEL=1000  # load filament inside the gears
       
       {% if printer.extruder.temperature < temp_target|float*0.9 %}
-            M109 S{temp_target|float*0.9} # wait till 0.9 of extruder temp is reached, then continue  
+          #wait till 0.9 of extruder temp is reached, then continue  
+          M109 S{temp_target|float*0.9} 
       {% endif %}
       
       M104 S{temp_target}       #continue heating to preset no waiting
+      
       FORCE_MOVE STEPPER=extruder DISTANCE=150 VELOCITY=5 ACCEL=1000
-      #G1 E150 F300                 # extrude 150mm
       M400                         # wait for current move to finish
       M104 S0                      # set hotend temperature to 0
-      #G92 E0                       # zero extruder position
       M118 Done Executing
+      
   {% else %}
+      #If not paused and bool is false
       M118 Reached Error State
   {% endif %}
   
