@@ -11,44 +11,28 @@ runout_gcode:
 #   PAUSE is complete. The default is not to run any G-Code commands.
     {% if printer.idle_timeout.state == "Printing" %}
         M118 "In PRESS PRINTING if statement"
-        #SAVE_VARIABLE VARIABLE=loadbutton VALUE='True'
-        #PAUSE
     {% else %}
         M118 "In PRESS else statement"
-        M118 {printing}
     {% endif %}
 insert_gcode:
 #   A list of G-Code commands to execute after a filament insert is
 #   detected. See docs/Command_Templates.md for G-Code format. The
 #   default is not to run any G-Code commands, which disables insert
 #   detection.
-  {% set temp_target = 235 %}
-  {% set paused = printer.pause_resume.is_paused == 'True' %}
-  #{% set run_once = printer["gcode_macro GLOBALS"].extrude|float %}
-  
+
+  #only used in not paused elif.
+  {% set temp_target = 235 %} 
+ 
   {% if printer.pause_resume.is_paused %}
-      SAVE_GCODE_STATE NAME=loading_filament
       M118 "In RELEASE PAUSED if STATEMENT"
-      debugprint
-      M118 {printer.state}
-      M82                          # set extruder to absolute mode
-      #G92 E0                       # zero extruder position
-      G4 P2000                     # wait for two seconds
       FORCE_MOVE STEPPER=extruder DISTANCE=20 VELOCITY=5 ACCEL=1000  # load filament inside the gears - force move needs to be enabled
       FORCE_MOVE STEPPER=extruder DISTANCE=150 VELOCITY=5 ACCEL=1000
-      #G1 E150 F300                 # extrude 150mm
       M400                         # wait for current move to finish
-      G92 E0
-      RESTORE_GCODE_STATE NAME=loading_filament
       M118 Done Executing
-      SAVE_VARIABLE VARIABLE=loadbutton VALUE='False'
+      
   {% elif not printer.pause_resume.is_paused %}
       M118 "in RELEASE else STATEMENT"
-      debugprint
-      M118 {printer.state}
-      M82                          # set extruder to absolute mode
-      G92 E0                       # zero extruder position
-      G4 P3000                     # wait for three seconds
+
       FORCE_MOVE STEPPER=extruder DISTANCE=20 VELOCITY=5 ACCEL=1000  # load filament inside the gears - force move needs to be enabled
       
       {% if printer.extruder.temperature < temp_target|float*0.9 %}
@@ -56,14 +40,11 @@ insert_gcode:
       {% endif %}
       
       M104 S{temp_target}       #continue heating to preset no waiting
+      
       FORCE_MOVE STEPPER=extruder DISTANCE=150 VELOCITY=5 ACCEL=1000
-      #G1 E150 F300                 # extrude 150mm
       M400                         # wait for current move to finish
       M104 S0                      # set hotend temperature to 0
-      #G92 E0                       # zero extruder position
       M118 Done Executing
-  {% else %}
-      M118 Reached Error State
   {% endif %}
 
 event_delay: 3.0
