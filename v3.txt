@@ -13,6 +13,8 @@ runout_gcode:
         M118 "In PRESS PRINTING if statement"
     {% else %}
         M118 "In PRESS else statement"
+        #Something might need to be executed here...
+
     {% endif %}
 insert_gcode:
 #   A list of G-Code commands to execute after a filament insert is
@@ -60,8 +62,7 @@ switch_pin: !PA1
 #   The pin on which the switch is connected. This parameter must be
 #   provided.
 
-############################################################### Filament Sensor
-
+############################################################### Unload Button
   
 [gcode_button filament_unload]
 pin: PA2                     # SU - use the input pin you have connected the sensor to
