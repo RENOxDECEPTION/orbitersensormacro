@@ -19,6 +19,7 @@ gcode:
     M118 {printer.idle_timeout}
     M118 {printer.pause_resume.is_paused}
 
+#M300 (beep) Should be defined to your liking somehwere...
 
 ########################## Filament Sensor Logic ##########################
 
@@ -114,16 +115,11 @@ release_gcode:
       
       M104 S{temp_target}       #continue heating to preset no waiting
       G4 P5000                     # wait for five seconds
-      #G92 E0                   # zero extruder position
+      
       FORCE_MOVE STEPPER=extruder DISTANCE=10 VELOCITY=2 ACCEL=1000  # load filament inside the gears - force move needs to be enabled
-      #G0 E10 F300             # extrude filament to shape tip @300mm/min
-      #G92 E0
       FORCE_MOVE STEPPER=extruder DISTANCE=-5 VELOCITY=10 ACCEL=1000  # load filament inside the gears - force move needs to be enabled
-      #G0 E-5 F3600             # extract filament to cold end
       FORCE_MOVE STEPPER=extruder DISTANCE=-80 VELOCITY=5 ACCEL=1000  # load filament inside the gears - force move needs to be enabled
-      #G0 E-80 F300             # continue extraction slow allow filament to be cooled enough before reaches the gears
       FORCE_MOVE STEPPER=extruder DISTANCE=-50 VELOCITY=7.5 ACCEL=1000  # load filament inside the gears - force move needs to be enabled
-      #G1 E-50 F1500            # retract additional filament fast
       M104 S0                  # set hotend temperature to 0
       M300                     # play single beep - only works if you have the M300 macro in use
       
