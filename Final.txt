@@ -21,6 +21,19 @@ gcode:
 
 #M300 (beep) Should be defined to your liking somehwere...
 
+########################### Working Idle Timeout Conditional ###########################
+
+[idle_timeout] 
+timeout: 120
+gcode:
+    {% if printer.pause_resume.is_paused %}
+        M118 REACHED IDLE TIMEOUT IS PAUSED
+    {% else %}
+        M118 REACHED IDLE TIMEOUT IS NOT PAUSED
+        TURN_OFF_HEATERS
+        M84
+    {% endif %}
+
 ########################## Filament Sensor Logic ##########################
 
 [filament_switch_sensor fsensor]
