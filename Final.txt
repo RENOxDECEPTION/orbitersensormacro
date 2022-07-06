@@ -126,9 +126,6 @@ release_gcode:
       M117 Filament unload
       M118 Filament unload
       UPDATE_DELAYED_GCODE ID=clear_display DURATION=10
-      M82                      # set extruder to absolute mode
-
-      #M104 S{temp_target}           # Set extruder temperature no waiting
       
       {% if printer.extruder.temperature < temp_target|float*0.9 %}
             M109 S{temp_target|float*0.9} # wait till 0.9 of extruder temp is reached, then continue  
