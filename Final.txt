@@ -38,7 +38,7 @@ runout_gcode:
         OCTO_PAUSE
     {% else %}
         M118 "Reached Not Printing else statement!"
-        #Something might need to be executed here...
+        #Something else could be executed here if no filament while not printing...
     {% endif %}
     
 insert_gcode:
