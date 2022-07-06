@@ -36,9 +36,12 @@ runout_gcode:
 #   PAUSE is complete. The default is not to run any G-Code commands.
     {% if printer.idle_timeout.state == 'Printing' %}
         M118 "In PRESS PRINTING if statement"
+        M300
+        M300
+        M300       
         OCTO_PAUSE
     {% else %}
-        M118 "Reached Not Printing else statement!"
+        M118 "Reached Not Printing else statement! Should probably investigate this if you didn't load filament."
         #Something else could be executed here if no filament while not printing...
     {% endif %}
     
@@ -52,14 +55,15 @@ insert_gcode:
   {% set temp_target = 235 %} 
  
   {% if printer.pause_resume.is_paused %}
-      M118 "In RELEASE PAUSED if STATEMENT"
+      M118 "Insert while Paused"
       FORCE_MOVE STEPPER=extruder DISTANCE=20 VELOCITY=5 ACCEL=1000  # load filament inside the gears - force move needs to be enabled
       FORCE_MOVE STEPPER=extruder DISTANCE=150 VELOCITY=5 ACCEL=1000
       M400                         # wait for current move to finish
-      M118 Done Executing
+      M300                     # play single beep - only works if you have the M300 macro in use
+      M118 Done Inserting while Paused
       
   {% elif not printer.pause_resume.is_paused %}
-      M118 "in RELEASE else STATEMENT"
+      M118 "Insert While Not Paused"
 
       FORCE_MOVE STEPPER=extruder DISTANCE=20 VELOCITY=5 ACCEL=1000  # load filament inside the gears - force move needs to be enabled
       
@@ -72,7 +76,8 @@ insert_gcode:
       FORCE_MOVE STEPPER=extruder DISTANCE=150 VELOCITY=5 ACCEL=1000
       M400                         # wait for current move to finish
       M104 S0                      # set hotend temperature to 0
-      M118 Done Executing
+      M300                     # play single beep - only works if you have the M300 macro in use
+      M118 Done Inserting While Not Paused
   {% endif %}
 
 event_delay: 3.0
@@ -102,8 +107,10 @@ release_gcode:
   {% if printer.idle_timeout.state == "Printing" %}
       M117 Not allowed!
       UPDATE_DELAYED_GCODE ID=clear_display DURATION=10
+      M118 Cannot unload filament while not paused! Should Probably investigate if you didn't push unload!
   {% else %}
       M117 Filament unload
+      M118 Filament unload
       UPDATE_DELAYED_GCODE ID=clear_display DURATION=10
       M82                      # set extruder to absolute mode
 
@@ -116,13 +123,14 @@ release_gcode:
       M104 S{temp_target}       #continue heating to preset no waiting
       G4 P5000                     # wait for five seconds
       
-      FORCE_MOVE STEPPER=extruder DISTANCE=10 VELOCITY=2 ACCEL=1000  # load filament inside the gears - force move needs to be enabled
-      FORCE_MOVE STEPPER=extruder DISTANCE=-5 VELOCITY=10 ACCEL=1000  # load filament inside the gears - force move needs to be enabled
-      FORCE_MOVE STEPPER=extruder DISTANCE=-80 VELOCITY=5 ACCEL=1000  # load filament inside the gears - force move needs to be enabled
-      FORCE_MOVE STEPPER=extruder DISTANCE=-50 VELOCITY=7.5 ACCEL=1000  # load filament inside the gears - force move needs to be enabled
+      FORCE_MOVE STEPPER=extruder DISTANCE=10 VELOCITY=2 ACCEL=1000  # Form Filament Tip
+      FORCE_MOVE STEPPER=extruder DISTANCE=-5 VELOCITY=10 ACCEL=1000  # Move Filament away from hotend
+      FORCE_MOVE STEPPER=extruder DISTANCE=-80 VELOCITY=5 ACCEL=1000  # Unload Filament Completely
+      FORCE_MOVE STEPPER=extruder DISTANCE=-50 VELOCITY=7.5 ACCEL=1000  # Unload some more because why not?
       M104 S0                  # set hotend temperature to 0
       M300                     # play single beep - only works if you have the M300 macro in use
-      
+      M118 Done Unloading!
+
   {% endif %}
 
  ############################## Extension to Pause/Resume Macros ##############################
